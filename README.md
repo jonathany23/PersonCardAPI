@@ -22,7 +22,7 @@
 Una vez desplegada la aplicación se puede consultar la los endpoints disponible en el la siguiente direccion:
 [http://localhost:8080/nuvu/api/swagger-ui.html](http://localhost:8080/nuvu/api/swagger-ui.html)
 
-![alt text](/Users/jonathany23/IdeaProjects/person/src/main/resources/img/swagger.png "Swagger")
+![alt text](https://github.com/jonathany23/PersonCardAPI/blob/main/src/main/resources/img/swagger.png "Swagger")
 
 ___
 ## Usando el API
