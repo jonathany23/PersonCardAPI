@@ -1,6 +1,8 @@
 package com.nuvu.person.web.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.nuvu.person.dto.AuthenticationRequest;
+import com.nuvu.person.dto.AuthenticationResponse;
 import com.nuvu.person.persistence.entity.Person;
 import com.nuvu.person.service.IPersonService;
 import org.junit.jupiter.api.BeforeEach;
@@ -10,6 +12,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Date;
@@ -30,14 +33,12 @@ class PersonAppTest {
     private IPersonService service;
 
     @Autowired
-    private PersonApp personApp;
-
-    @Autowired
-    private ObjectMapper objectMapper;
+    private AuthController authController;
 
     private static final String jsonRequest = "{\"legalId\":\"002\",\"legalIdType\":\"CC\",\"name\":\"testname\",\"lastName\":\"tetslastname\",\"phone\":\"038982382\",\"birthDate\":\"17/05/2021\"}";
 
     private Person person;
+    private String token;
 
     @BeforeEach
     private void setUp(){
@@ -48,6 +49,13 @@ class PersonAppTest {
         person.setLastName("tetslastname");
         person.setPhone("038982382");
         person.setBirthDate(new Date());
+
+        AuthenticationRequest authenticationRequest = new AuthenticationRequest();
+        authenticationRequest.setUsername("admin");
+        authenticationRequest.setPassword("admin");
+
+        ResponseEntity<AuthenticationResponse> tokenER = authController.createToken(authenticationRequest);
+        token = tokenER.getBody().getJwt();
     }
 
     @Test
@@ -57,7 +65,8 @@ class PersonAppTest {
 
         mockMvc.perform(post("/person/save")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(jsonRequest))
+                .content(jsonRequest)
+                .header("Authorization", "Bearer "+token))
 
                 .andExpect(status().isOk());
     }
@@ -69,7 +78,8 @@ class PersonAppTest {
 
         mockMvc.perform(patch("/person/edit")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(jsonRequest))
+                .content(jsonRequest)
+                .header("Authorization", "Bearer "+token))
 
                 .andExpect(status().isOk());
     }
@@ -79,7 +89,9 @@ class PersonAppTest {
         doReturn(Optional.of(person))
                 .when(service).getPerson(any());
 
-        mockMvc.perform(get("/person/001"))
+        mockMvc.perform(get("/person/001")
+                .header("Authorization", "Bearer "+token))
+
                 .andExpect(status().isOk());
     }
 
@@ -88,7 +100,8 @@ class PersonAppTest {
         doReturn(true)
                 .when(service).deletePerson(any());
 
-        mockMvc.perform(delete("/person/delete/001"))
+        mockMvc.perform(delete("/person/delete/001")
+                .header("Authorization", "Bearer "+token))
                 .andExpect(status().isOk());
     }
 }
